@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Borrow List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .form-control {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .form-control label {
+            margin-right: 10px;
+        }
+        #add-btn, #show-report-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #add-btn:hover, #show-report-btn:hover {
+            background-color: #45a049;
+        }
+        #borrower-name, #amount, #borrow-date {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        #borrow-status {
+            padding: 8px;
+        }
+        #borrower-list {
+            display: block;
+            width: 100%;
+        }
+        .form-control input, .form-control select {
+            width: 70%;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Money Borrow List</h2>
+
+    <div>
+        <div class="form-control">
+            <label for="borrower-name">Borrower Name:</label>
+            <input type="text" id="borrower-name" required>
+        </div>
+        <div class="form-control">
+            <label for="amount">Amount Borrowed:</label>
+            <input type="number" id="amount" required>
+        </div>
+        <div class="form-control">
+            <label for="borrow-date">Borrow Date:</label>
+            <input type="date" id="borrow-date" required>
+        </div>
+        <div class="form-control">
+            <label for="borrow-status">Status:</label>
+            <select id="borrow-status" required>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+            </select>
+        </div>
+        <button id="add-btn" onclick="addBorrowRecord()">Add Borrow Record</button>
+    </div>
+
+    <div id="borrower-list">
+        <h3>Borrowed Money Records</h3>
+        <table id="borrower-table">
+            <thead>
+                <tr>
+                    <th>Borrower Name</th>
+                    <th>Amount Borrowed</th>
+                    <th>Borrow Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="borrower-body">
+                <!-- Borrow records will be displayed here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBorrowRecords();
+        });
+
+        function loadBorrowRecords() {
+            const borrowerRecords = JSON.parse(localStorage.getItem("borrowerRecords")) || [];
+            displayBorrowRecords(borrowerRecords);
+        }
+
+        function displayBorrowRecords(records) {
+            const tableBody = document.getElementById("borrower-body");
+            tableBody.innerHTML = "";
+
+            records.forEach((record, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${record.name}</td>
+                    <td>${record.amount}</td>
+                    <td>${record.borrowDate}</td>
+                    <td>${record.status}</td>
+                    <td>
+                        <button onclick="editRecord(${index})">Edit</button>
+                        <button onclick="deleteRecord(${index})">Delete</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function addBorrowRecord() {
+            const name = document.getElementById("borrower-name").value;
+            const amount = document.getElementById("amount").value;
+            const borrowDate = document.getElementById("borrow-date").value;
+            const status = document.getElementById("borrow-status").value;
+
+            if (name && amount && borrowDate && status) {
+                const borrowerRecords = JSON.parse(localStorage.getItem("borrowerRecords")) || [];
+                borrowerRecords.push({ name, amount, borrowDate, status });
+                localStorage.setItem("borrowerRecords", JSON.stringify(borrowerRecords));
+
+                // Clear input fields after adding
+                document.getElementById("borrower-name").value = "";
+                document.getElementById("amount").value = "";
+                document.getElementById("borrow-date").value = "";
+                document.getElementById("borrow-status").value = "Pending";
+
+                loadBorrowRecords();
+            } else {
+                alert("Please fill out all fields.");
+            }
+        }
+
+        function editRecord(index) {
+            const borrowerRecords = JSON.parse(localStorage.getItem("borrowerRecords"));
+            const record = borrowerRecords[index];
+
+            const name = prompt("Edit Borrower Name:", record.name);
+            const amount = prompt("Edit Amount Borrowed:", record.amount);
+            const borrowDate = prompt("Edit Borrow Date:", record.borrowDate);
+            const status = prompt("Edit Status (Pending/Paid):", record.status);
+
+            if (name && amount && borrowDate && status) {
+                borrowerRecords[index] = { name, amount, borrowDate, status };
+                localStorage.setItem("borrowerRecords", JSON.stringify(borrowerRecords));
+                loadBorrowRecords();
+            }
+        }
+
+        function deleteRecord(index) {
+            const borrowerRecords = JSON.parse(localStorage.getItem("borrowerRecords"));
+            borrowerRecords.splice(index, 1);
+            localStorage.setItem("borrowerRecords", JSON.stringify(borrowerRecords));
+            loadBorrowRecords();
+        }
+    </script>
+
+</body>
+</html>
